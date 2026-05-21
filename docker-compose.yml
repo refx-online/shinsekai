@@ -1,0 +1,159 @@
+name: refx
+
+services:
+  mysql:
+    image: mysql:8.0
+    network_mode: host
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    network_mode: host
+    command: redis-server --appendonly yes --port ${REDIS_PORT:-6379}
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "${REDIS_PORT:-6379}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  forlorn:
+    build:
+      context: ./forlorn
+      dockerfile: Dockerfile
+    image: forlorn:latest
+    network_mode: host
+    env_file: ./forlorn/.env
+    volumes:
+      - union_data:/srv/root/.data
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      bakenohana:
+        condition: service_started
+    restart: unless-stopped
+
+  omajinai:
+    build:
+      context: ./omajinai
+      dockerfile: Dockerfile
+    image: omajinai:latest
+    network_mode: host
+    env_file: ./omajinai/.env
+    volumes:
+      - union_data:/srv/root/.data
+    restart: unless-stopped
+
+  mist:
+    build:
+      context: ./mist
+      dockerfile: Dockerfile
+    image: mist:latest
+    network_mode: host
+    env_file: ./mist/.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  dorchadas:
+    build:
+      context: ./dorchadas
+      dockerfile: Dockerfile
+    image: dorchadas:latest
+    network_mode: host
+    env_file: ./dorchadas/.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  assets-service:
+    build:
+      context: ./assets-service
+      dockerfile: Dockerfile
+    image: assets-service:latest
+    network_mode: host
+    env_file: ./assets-service/.env
+    volumes:
+      - union_data:/srv/root/.data
+    restart: unless-stopped
+
+  updater-service:
+    build:
+      context: ./updater-service
+      dockerfile: Dockerfile
+    image: updater-service:latest
+    network_mode: host
+    env_file: ./updater-service/.env
+    restart: unless-stopped
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    network_mode: host
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
+    restart: unless-stopped
+
+  bakenohana:
+    build:
+      context: ./bakenohana
+      dockerfile: Dockerfile
+    image: bakenohana:latest
+    network_mode: host
+    env_file: ./bakenohana/.env
+    volumes:
+      - union_data:/srv/root/.data
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  recalculate:
+    build:
+      context: ./recalculate
+      dockerfile: Dockerfile
+    image: recalculate:latest
+    network_mode: host
+    env_file: ./recalculate/.env
+    volumes:
+      - union_data:/srv/root/.data
+    # profiles: tools means this service is excluded from plain `docker compose up`
+    # Run with: make recalc  or  docker compose run --rm recalculate [args]
+    profiles:
+      - tools
+    restart: "no"
+
+volumes:
+  mysql_data:
+  redis_data:
+  # union_data is the shared beatmap/replay/screenshot/osz store.
+  # Named explicitly so it's stable across compose project renames.
+  union_data:
+    name: union_data
