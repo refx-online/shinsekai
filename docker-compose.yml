@@ -75,6 +75,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    volumes:
+      - union_data:/srv/root/.data
     restart: unless-stopped
 
   dorchadas:
@@ -89,6 +91,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    volumes:
+      - union_data:/srv/root/.data
     restart: unless-stopped
 
   assets-service:
