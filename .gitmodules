@@ -1,0 +1,24 @@
+[submodule "forlorn"]
+	path = forlorn
+	url = https://github.com/refx-online/forlorn.git
+[submodule "omajinai"]
+	path = omajinai
+	url = https://github.com/refx-online/omajinai.git
+[submodule "recalculate"]
+	path = recalculate
+	url = https://github.com/refx-online/recalculate.git
+[submodule "mist"]
+	path = mist
+	url = https://github.com/refx-online/mist.git
+[submodule "dorchadas"]
+	path = dorchadas
+	url = https://github.com/refx-online/dorchadas.git
+[submodule "bakenohana"]
+	path = bakenohana
+	url = https://github.com/refx-online/bakenohana.git
+[submodule "assets-service"]
+	path = assets-service
+	url = https://github.com/refx-online/assets-service
+[submodule "updater-service"]
+	path = updater-service
+	url = https://github.com/refx-online/updater-service.git
