@@ -16,7 +16,7 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
-      interval: 10s
+      interval: 20s
       timeout: 15s
       retries: 10
       start_period: 30s
@@ -113,6 +113,35 @@ services:
     image: updater-service:latest
     network_mode: host
     env_file: ./updater-service/.env
+    restart: unless-stopped
+
+  speedforce:
+    build:
+      context: ./speedforce
+      dockerfile: Dockerfile
+    image: speedforce:latest
+    network_mode: host
+    env_file: ./speedforce/.env
+    volumes:
+      - union_data:/srv/root/.data
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      omajinai:
+        condition: service_started
+    restart: unless-stopped
+
+  beatmap-service:
+    build:
+      context: ./beatmap-service
+      dockerfile: Dockerfile
+    image: beatmap-service:latest
+    network_mode: host
+    env_file: ./beatmap-service/.env
+    volumes:
+      - union_data:/srv/root/.data
     restart: unless-stopped
 
   cloudflared:

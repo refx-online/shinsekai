@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-This is the **re;fx** osu! private server monorepo. Eight services, each in its own subdirectory with its own git repo, Dockerfile, and `.env`.
+This is the **re;fx** osu! private server monorepo. Nine services, each in its own subdirectory with its own git repo, Dockerfile, and `.env`.
 
 | Service | Language | Role |
 |---|---|---|
@@ -14,6 +14,7 @@ This is the **re;fx** osu! private server monorepo. Eight services, each in its 
 | `mist` | TypeScript (Fastify) | Public developer API (`/v1`) |
 | `dorchadas` | SvelteKit + Bun | Web frontend |
 | `bakenohana` | Crystal (Kemal) | Bancho protocol server (real-time TCP-over-HTTP) |
+| `speedforce` | Python (FastAPI) | osu!(lazer) API v2 + OAuth + lazer score submission |
 | `assets-service` | Python (FastAPI) | Seasonal BGs, menu content, medals |
 | `updater-service` | Python (FastAPI) | Client/patcher file distribution via R2/local storage |
 
@@ -202,3 +203,41 @@ Both `assets-service` and `updater-service` follow the same layout:
 - `app/route/` or `app/routes/` — route handlers
 - Linting: `black` + `isort`; type checking: `mypy` (strict, pydantic plugin)
 - Pre-commit hooks configured in `.pre-commit-config.yaml`
+
+---
+
+## speedforce (Python/FastAPI)
+
+osu!(lazer) service — speaks osu! API v2 + OAuth, mints JWTs into `oauth_tokens`, writes lazer scores into the same `scores`, `stats`, `lazer_scores` tables `forlorn` already uses, and ZADDs the same `bancho:leaderboard:{mode}` Redis ZSETs so stable + lazer share one ranking.
+
+**Build & run:**
+```bash
+cd speedforce
+poetry install
+make migrate            # apply alembic on top of init.sql (adds 3 tables)
+poetry run python -m main
+make build && make run  # Docker
+```
+
+**Architecture:**
+- `app/__init__.py` — FastAPI app, lifespan opens DB engine + Redis + omajinai HTTP client.
+- `app/router/v2/` — `/api/v2` endpoints: `me`, `user`, `beatmap`, `beatmapset`, `ranking`, `friends`, `score`, `replay`, `misc`, `signalr_stub`.
+- `app/auth/` — `/oauth/token` (password + refresh + client_credentials grants), HS256 JWT, Bearer dep at `auth/deps.py:get_current_user`.
+- `app/usecases/score_submission.py` — 2-phase flow: POST `/api/v2/beatmaps/{id}/solo/scores` → token, PUT with `SoloScoreSubmissionInfo` → writes `scores` + `lazer_scores` + `lazer_scores_total_score` + updates `score_tokens`. PP via omajinai `/calculate`.
+- `app/usecases/stats_update.py` — weighted top-100 pp+acc (formula matches `forlorn/forlorn/src/usecases/stats.rs:10-31`), updates `stats`, ZADDs `bancho:leaderboard:{mode}` and `:{country}` (shared with forlorn for unified rankings). **Does NOT publish `refx:refresh_stats` / `refx:score_submitted`** — speedforce is decoupled from bakenohana since lazer users aren't on bancho protocol.
+- `app/state/current_mods.py` — in-memory `{user_id: mods_int}` tracker. Updated by metadata hub `UpdateActivity`/`UpdateStatus` and by score submission. `profile.user_extended()` and `router/v2/user.py:get_user_scores` use `effective_mode(ruleset, current_mods)` so vanilla lazer client requesting `?mode=osu` while user has RX mod set returns mode-4 stats. Mirrors `meat-my-beat-i app/constants/mods.py:437-448`.
+- `app/helpers/mods.py` — bitflag↔acronym, `clock_rate_for(mods)`.
+- `app/helpers/ruleset.py` — `effective_mode()` maps lazer ruleset+RX/AP/TD into the same numeric mode IDs forlorn writes.
+
+**Schema additions** (alembic migration `0001_lazer_extras`, applied on top of `init.sql`):
+- `oauth_clients` — registered OAuth2 clients.
+- `lazer_scores_total_score` — wide bigint columns for lazer's `total_score` family.
+- `lazer_score_best` — `(user, beatmap, ruleset)` → best lazer score id by `total_score`.
+
+**Out of scope (v1):** multiplayer (DB-heavy), plugins, OAuth-app management. Multiplayer SignalR endpoints (`/multiplayer`) return 503.
+
+**SignalR hubs (osu!lazer real-time):** `/metadata`, `/spectator`. Each has `POST /<hub>/negotiate` (HTTP) + WS handshake at `/<hub>?access_token=<jwt>`. JSON Hub Protocol with `\x1e` record-separator framing. Implementation in `app/signalr/` — references ppy's `osu-server-spectator/Hubs/Metadata/MetadataHub.cs` and `Spectator/SpectatorHub.cs` for hub method signatures (`UpdateActivity`, `BeginWatchingUserPresence`, `BeginPlaySession`, `SendFrameData`, `StartWatchingUser`).
+
+**Chat + Notifications:** plain WebSocket at `/home/notifications/feed` (URL returned in `GET /api/v2/notifications.notification_endpoint`). Lazer's `WebSocketNotificationsClient` uses `{event, data, error}` JSON, NOT SignalR. Server-side dispatcher in `app/notifications/server.py` emits `chat.channel.join`, `chat.channel.part`, `chat.message.new`, `new_private_notification`. Persisted via migration `0002_chat_notifications`.
+
+**Key env vars:** `HOST`, `PORT`, `DEBUG`, `MYSQL_*`, `REDIS_*`, `JWT_SECRET`, `JWT_ALGORITHM`, `JWT_EXPIRES_IN`, `OMAJINAI_BASE_URL`, `BEATMAPS_PATH`, `REPLAYS_PATH`
