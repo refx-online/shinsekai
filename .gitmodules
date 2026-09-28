@@ -22,3 +22,6 @@
 [submodule "updater-service"]
 	path = updater-service
 	url = https://github.com/refx-online/updater-service.git
+[submodule "beatmap-service"]
+	path = beatmap-service
+	url = https://github.com/refx-online/beatmap-service.git

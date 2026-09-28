@@ -54,7 +54,7 @@ shell:
 
 ## Run the recalculate CLI (pass ARGS= for flags): make recalc ARGS="--no-stats -m 0,1"
 recalc:
-	$(COMPOSE) run --rm --profile tools recalculate $(ARGS)
+	$(COMPOSE) --profile tools run --rm recalculate $(ARGS)
 
 # ── Cleanup ───────────────────────────────────────────────────────────────────
 
