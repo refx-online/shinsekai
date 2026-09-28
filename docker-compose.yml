@@ -116,6 +116,12 @@ services:
     restart: unless-stopped
 
   speedforce:
+    # NOTE (local setup): upstream repo refx-online/speedforce is empty
+    # (no branches/commits), so there is nothing to build. Gated behind
+    # the `lazer` profile so plain `make run` skips it. Enable with
+    # `docker compose --profile lazer up` once implemented.
+    profiles:
+      - lazer
     build:
       context: ./speedforce
       dockerfile: Dockerfile
