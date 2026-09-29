@@ -830,6 +830,7 @@ CREATE TABLE `users` (
   `api_key` char(36) DEFAULT NULL,
   `whitelist` int NOT NULL DEFAULT '0',
   `last_namechange` bigint NOT NULL DEFAULT '0',
+  `last_countrychange` bigint NOT NULL DEFAULT '0',
   `preferred_metric` enum('pp','score') NOT NULL DEFAULT 'pp',
   PRIMARY KEY (`id`),
   UNIQUE KEY `users_name_uindex` (`name`),
