@@ -875,6 +875,14 @@ INSERT INTO stats (id, mode) VALUES (1, 4); # rx!std
 INSERT INTO stats (id, mode) VALUES (1, 5); # rx!taiko
 INSERT INTO stats (id, mode) VALUES (1, 6); # rx!catch
 INSERT INTO stats (id, mode) VALUES (1, 8); # ap!std
+INSERT INTO stats (id, mode) VALUES (1, 12); # cheat!std
+INSERT INTO stats (id, mode) VALUES (1, 13); # cheat!taiko
+INSERT INTO stats (id, mode) VALUES (1, 14); # cheat!catch
+INSERT INTO stats (id, mode) VALUES (1, 15); # cheat!mania
+INSERT INTO stats (id, mode) VALUES (1, 21); # cheat-rx!std
+INSERT INTO stats (id, mode) VALUES (1, 22); # cheat-rx!taiko
+INSERT INTO stats (id, mode) VALUES (1, 23); # cheat-rx!catch
+INSERT INTO stats (id, mode) VALUES (1, 24); # cheat-ap!std
 
 
 # userid 2 is reserved for ppy in osu!, and the
