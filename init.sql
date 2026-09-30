@@ -464,7 +464,7 @@ DROP TABLE IF EXISTS `performance_reports`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `performance_reports` (
   `scoreid` bigint unsigned NOT NULL,
-  `mod_mode` enum('vanilla','relax','autopilot') NOT NULL DEFAULT 'vanilla',
+  `mod_mode` enum('vanilla','relax','autopilot','cheat','cheat-rx','cheat-ap') NOT NULL DEFAULT 'vanilla',
   `os` varchar(64) NOT NULL,
   `fullscreen` tinyint(1) NOT NULL,
   `fps_cap` varchar(16) NOT NULL,
