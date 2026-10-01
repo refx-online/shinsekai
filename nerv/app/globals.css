@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+/* NERV command theme — copied from the nerv-ui example shell:
+   orange ambience up top, faint grid, CRT scanlines over everything. */
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  color: var(--color-nerv-white);
+  background:
+    radial-gradient(
+      circle at top center,
+      rgba(255, 153, 0, 0.06),
+      transparent 32%
+    ),
+    linear-gradient(180deg, #050505 0%, #000000 24%, #000000 100%);
+  letter-spacing: 0.02em;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.18;
+  background-image:
+    linear-gradient(rgba(255, 153, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 153, 0, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.06) 2px,
+    rgba(0, 0, 0, 0.06) 4px
+  );
+}
+
+::selection {
+  background: #ff9900;
+  color: #000000;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+  border-left: 1px solid rgba(255, 153, 0, 0.08);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 153, 0, 0.35);
+}
+
+/* Drifting signal texture behind surveillance subject channels. */
+@keyframes feed-drift {
+  0% { background-position: 0 0; }
+  100% { background-position: 56px 0; }
+}
+
+.feed-texture {
+  background-image: repeating-linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.035) 0 2px,
+    transparent 2px 8px
+  );
+  animation: feed-drift 3s linear infinite;
+}
