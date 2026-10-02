@@ -81,7 +81,7 @@ make build && make run ARGS="--no-stats -m 0,1"   # Docker
 **Architecture:**
 - Fetches best scores from MySQL, recalculates pp via `refx-pp`, updates `scores` table
 - Recomputes weighted pp/accuracy per user, updates `stats` table, refreshes Redis leaderboards
-- Supports legacy and lazer scores, custom clock rates, relax (modes 4-6), autopilot (8), cheat (12/16), touch device (20)
+- Supports legacy and lazer scores, custom clock rates, relax (modes 4-6), autopilot (7), cheat (8/16), touch device (20)
 
 **Key env vars:** `DATABASE_URL`, `REDIS_URL`, `BEATMAPS_PATH`, `BEATMAPS_SERVICE_URL`
 
@@ -103,7 +103,7 @@ npm run start      # run compiled output
 - `src/repositories/` — one file per domain (users, maps, scores, stats, clans, history, tourney)
 - `src/db.ts` — MySQL pool with `fetchOne`/`fetchAll`; **`LIMIT ?` as prepared statement param fails** — always interpolate bounds-checked values directly: `` `LIMIT ${limit}` ``
 - `src/redis.ts` — ioredis singleton for rank lookups
-- Redis leaderboard keys: `bancho:leaderboard:{mode}` and `bancho:leaderboard:{mode}:{country}`; mode 7 maps to redis key 8
+- Redis leaderboard keys: `bancho:leaderboard:{mode}` and `bancho:leaderboard:{mode}:{country}`; modes are dense 0-15
 - Float fields must be rounded: `r2()` (2dp), `r3()` (3dp) to match Python orjson output
 - Datetime format: `YYYY-MM-DDTHH:MM:SS` (no timezone suffix) via `fmtDatetime()`
 - Lazer scores: when `mods_json` present, omit `mods` integer and `mods_readable`; when absent, set `mods_json: null`

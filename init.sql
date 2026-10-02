@@ -273,6 +273,7 @@ CREATE TABLE `maps` (
   `id` int NOT NULL,
   `set_id` int NOT NULL,
   `status` int NOT NULL,
+  `status_mask` bigint unsigned NOT NULL DEFAULT 80421421917330, -- 0x492492492492: pending (010) in all 16 mode slots
   `md5` char(32) NOT NULL,
   `artist` varchar(128) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
   `title` varchar(128) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
@@ -874,15 +875,15 @@ INSERT INTO stats (id, mode) VALUES (1, 3); # vn!mania
 INSERT INTO stats (id, mode) VALUES (1, 4); # rx!std
 INSERT INTO stats (id, mode) VALUES (1, 5); # rx!taiko
 INSERT INTO stats (id, mode) VALUES (1, 6); # rx!catch
-INSERT INTO stats (id, mode) VALUES (1, 8); # ap!std
-INSERT INTO stats (id, mode) VALUES (1, 12); # cheat!std
-INSERT INTO stats (id, mode) VALUES (1, 13); # cheat!taiko
-INSERT INTO stats (id, mode) VALUES (1, 14); # cheat!catch
-INSERT INTO stats (id, mode) VALUES (1, 15); # cheat!mania
-INSERT INTO stats (id, mode) VALUES (1, 21); # cheat-rx!std
-INSERT INTO stats (id, mode) VALUES (1, 22); # cheat-rx!taiko
-INSERT INTO stats (id, mode) VALUES (1, 23); # cheat-rx!catch
-INSERT INTO stats (id, mode) VALUES (1, 24); # cheat-ap!std
+INSERT INTO stats (id, mode) VALUES (1, 7); # ap!std
+INSERT INTO stats (id, mode) VALUES (1, 8); # cheat!std
+INSERT INTO stats (id, mode) VALUES (1, 9); # cheat!taiko
+INSERT INTO stats (id, mode) VALUES (1, 10); # cheat!catch
+INSERT INTO stats (id, mode) VALUES (1, 11); # cheat!mania
+INSERT INTO stats (id, mode) VALUES (1, 12); # cheat-rx!std
+INSERT INTO stats (id, mode) VALUES (1, 13); # cheat-rx!taiko
+INSERT INTO stats (id, mode) VALUES (1, 14); # cheat-rx!catch
+INSERT INTO stats (id, mode) VALUES (1, 15); # cheat-ap!std
 
 
 # userid 2 is reserved for ppy in osu!, and the

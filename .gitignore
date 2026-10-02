@@ -1,3 +1,6 @@
 .env
 # local-only compose overrides (ports, bind mounts)
 docker-compose.override.yml
+
+# local working notes (never committed)
+notes.md
