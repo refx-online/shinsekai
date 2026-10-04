@@ -282,6 +282,12 @@ CREATE TABLE `maps` (
   `filename` varchar(256) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
   `last_update` datetime NOT NULL,
   `total_length` int NOT NULL,
+  -- lazer's APIBeatmap exposes these; without them the difficulty picker bar
+  -- is always empty. sourced from osu-api (count_normal/slider/spinner).
+  `hit_length` int NOT NULL DEFAULT '0',
+  `count_normal` int NOT NULL DEFAULT '0',
+  `count_slider` int NOT NULL DEFAULT '0',
+  `count_spinner` int NOT NULL DEFAULT '0',
   `max_combo` int NOT NULL,
   `frozen` tinyint(1) NOT NULL DEFAULT '0',
   `plays` int NOT NULL DEFAULT '0',
