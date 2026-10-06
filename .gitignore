@@ -4,3 +4,6 @@ docker-compose.override.yml
 
 # local working notes (never committed)
 notes.md
+
+# findings docs live at ../findings, outside this repo; keep them out of it
+findings/
